@@ -5,36 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>正在開啟預約系統...</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f4f4f4; color: #333; text-align: center; }
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fff; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; }
+        #ios-guide { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; color: white; padding-top: 20px; }
+        .arrow { position: absolute; top: 10px; right: 20px; font-size: 40px; animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+        .loading-box { padding: 20px; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .msg { padding: 20px; }
     </style>
 </head>
 <body>
-    <div class="msg">
-        <div class="loader"></div>
-        <h2>正在為您跳轉至預約系統</h2>
-        <p>若畫面沒有自動跳轉，請點擊右上角「...」並選擇「在瀏覽器中開啟」</p>
+
+    <div id="ios-guide">
+        <div class="arrow">↗️</div>
+        <div style="margin-top: 80px; padding: 20px;">
+            <h2 style="color: #ffcc00;">請點擊右上角「...」</h2>
+            <p style="font-size: 18px; line-height: 1.6;">
+                選擇 <strong style="background: #ffcc00; color: #000; padding: 2px 5px; border-radius: 4px;">「在瀏覽器中開啟」</strong><br>
+                以確保預約功能與圖片正常顯示
+            </p>
+        </div>
+    </div>
+
+    <div class="loading-box" id="loading-box">
+        <div class="spinner"></div>
+        <p>正在為您開啟預約系統...</p>
     </div>
 
     <script>
         (function() {
-            // 您的正式網址
             var targetUrl = "https://script.google.com/macros/s/AKfycbzOpt6XFT4eCevw5TfETgvLXfr0hMB1RA96G_e5JXGWO4AUK2MYRYqwfWjJBqsYJIrB/exec";
-            
             var ua = navigator.userAgent || navigator.vendor || window.opera;
-            var isAndroid = ua.indexOf('Android') > -1;
+            
             var isInstagram = ua.indexOf('Instagram') > -1;
+            var isAndroid = ua.indexOf('Android') > -1;
+            var isIos = /iPhone|iPad|iPod/.test(ua);
 
-            if (isInstagram && isAndroid) {
-                // Android 專用：強制喚起系統 Chrome 瀏覽器，解決 undefined 錯誤
-                var cleanUrl = targetUrl.replace(/^https?:\/\//, "");
-                var chromeIntent = "intent://" + cleanUrl + "#Intent;scheme=https;action=android.intent.action.VIEW;package=com.android.chrome;S.browser_fallback_url=" + encodeURIComponent(targetUrl) + ";end";
-                window.location.href = chromeIntent;
+            if (isInstagram) {
+                if (isAndroid) {
+                    // Android: 執行 Intent 自動喚起 Chrome
+                    var cleanUrl = targetUrl.replace(/^https?:\/\//, "");
+                    var chromeIntent = "intent://" + cleanUrl + "#Intent;scheme=https;action=android.intent.action.VIEW;package=com.android.chrome;S.browser_fallback_url=" + encodeURIComponent(targetUrl) + ";end";
+                    window.location.replace(chromeIntent);
+                } else if (isIos) {
+                    // iOS: 無法自動跳轉，顯示遮罩導引
+                    document.getElementById('ios-guide').style.display = 'block';
+                    document.getElementById('loading-box').style.display = 'none';
+                } else {
+                    window.location.href = targetUrl;
+                }
             } else {
-                // iOS 或一般環境：直接重定向
-                // iOS IG 不允許自動跳轉 Safari，因此會停在此頁面，使用者可依提示手動點擊右上角
+                // 如果已經在一般瀏覽器，直接去目標網址
                 window.location.href = targetUrl;
             }
         })();

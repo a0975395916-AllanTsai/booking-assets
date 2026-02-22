@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正在開啟預約系統...</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f4f4f4; color: #333; text-align: center; }
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .msg { padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="msg">
+        <div class="loader"></div>
+        <h2>正在為您跳轉至預約系統</h2>
+        <p>若畫面沒有自動跳轉，請點擊右上角「...」並選擇「在瀏覽器中開啟」</p>
+    </div>
+
+    <script>
+        (function() {
+            // 您的正式網址
+            var targetUrl = "https://script.google.com/macros/s/AKfycbzOpt6XFT4eCevw5TfETgvLXfr0hMB1RA96G_e5JXGWO4AUK2MYRYqwfWjJBqsYJIrB/exec";
+            
+            var ua = navigator.userAgent || navigator.vendor || window.opera;
+            var isAndroid = ua.indexOf('Android') > -1;
+            var isInstagram = ua.indexOf('Instagram') > -1;
+
+            if (isInstagram && isAndroid) {
+                // Android 專用：強制喚起系統 Chrome 瀏覽器，解決 undefined 錯誤
+                var cleanUrl = targetUrl.replace(/^https?:\/\//, "");
+                var chromeIntent = "intent://" + cleanUrl + "#Intent;scheme=https;action=android.intent.action.VIEW;package=com.android.chrome;S.browser_fallback_url=" + encodeURIComponent(targetUrl) + ";end";
+                window.location.href = chromeIntent;
+            } else {
+                // iOS 或一般環境：直接重定向
+                // iOS IG 不允許自動跳轉 Safari，因此會停在此頁面，使用者可依提示手動點擊右上角
+                window.location.href = targetUrl;
+            }
+        })();
+    </script>
+</body>
+</html>
